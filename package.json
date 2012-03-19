@@ -1,0 +1,33 @@
+{
+  "name": "npm-updates",
+  "description": "Emits update events from the npm repository.",
+  "keywords": ["events", "packages", "modules", "npm"],
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/fent/npm-updates.git"
+  },
+  "author": "fent (https://github.com/fent)",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "mocha -R spec test/*-test.js"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "engines": {
+    "node": "*"
+  },
+  "dependencies": {
+    "request": "2.9.x",
+    "jstream": "0.1.x"
+  },
+  "devDependencies": {
+    "mocha": "0.x.x",
+    "nock": "0.11.x"
+  },
+  "licenses": [ {
+    "type": "MIT",
+    "url" : "http://github.com/fent/npm-updates/raw/master/LICENSE"
+  }]
+}
