@@ -46,19 +46,23 @@ Change events from the couchdb _changes feed.
 
 ### Event: 'new'
 `function (info) { }`
+
 First version of module published. `info` is equivalent to its `package.json` contents.
 
 ### Event: 'update'
 `functiion (info) { }`
+
  Module is updated to a newer version. `info` is equivalent to its `package.json` contents.
 
 
 ### Event: 'publish'
 `function (info) { }`
+
 Emitted for both `new` and `update` events. `info` is equivalent to its `package.json` contents.
 
 ### Event: 'delete'
 `function (name) { }`
+
 Module was deleted from the registry.
 
 
