@@ -22,7 +22,7 @@ npm.on('new', function(info) {
 ### new NPM([options])
 
 Creates a new instance. `options` can have
-for up
+
 * `autoStart` - Defaults to `true`. Will auto start requesting the registry for updates. If disabled, you can use `start()`.
 * `uri` - You can set the couchdb registry uri that it checks with this.
 
