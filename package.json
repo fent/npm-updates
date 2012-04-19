@@ -2,7 +2,7 @@
   "name": "npm-updates",
   "description": "Emits update events from the npm repository.",
   "keywords": ["events", "packages", "modules", "npm"],
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": {
     "type": "git",
     "url": "git://github.com/fent/npm-updates.git"
