@@ -18,15 +18,12 @@
   "directories": {
     "lib": "./lib"
   },
-  "engines": {
-    "node": "*"
-  },
   "dependencies": {
     "request": "2.9.x",
     "jstream": "0.1.x"
   },
   "devDependencies": {
-    "mocha": "0.x.x",
+    "mocha": "x",
     "nock": "0.11.x"
   },
   "licenses": [ {
