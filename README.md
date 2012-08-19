@@ -35,7 +35,8 @@ Starts receiving updates.
 Stops requesting updates and emitting events.
 
 ### Event: 'change'
-`function (data) { }`
+* `Object`
+
 Change events from the couchdb _changes feed.
 
 ```js
@@ -45,23 +46,23 @@ Change events from the couchdb _changes feed.
 ```
 
 ### Event: 'new'
-`function (info) { }`
+* `Object` - Info.
 
 First version of module published. `info` is equivalent to its `package.json` contents.
 
 ### Event: 'update'
-`functiion (info) { }`
+* `Object` - Info.
 
  Module is updated to a newer version. `info` is equivalent to its `package.json` contents.
 
 
 ### Event: 'publish'
-`function (info) { }`
+* `Object` - Info.
 
 Emitted for both `new` and `update` events. `info` is equivalent to its `package.json` contents.
 
 ### Event: 'delete'
-`function (name) { }`
+* `string` - Name.
 
 Module was deleted from the registry.
 
