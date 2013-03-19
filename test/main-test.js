@@ -1,8 +1,9 @@
-var NPM = require('..')
-  , assert = require('assert')
-  , path = require('path')
-  , nock = require('nock')
-  ;
+/*jshint quotmark:false */
+var assert = require('assert');
+var path   = require('path');
+var url    = require('url');
+var fs     = require('fs');
+var muk    = require('muk');
 
 
 var expectedChanges = [
@@ -11,12 +12,46 @@ var expectedChanges = [
 , {"seq":99238,"id":"Hanzi","changes":[{"rev":"4-5ed20f975bd563ae5d1c8c1d574fe24c"}],"deleted":true}
 ];
 
-var expectedNews = ['newsemitter@0.1.0']
-var expectedUpdates = ['chain-tiny@0.2.1']
+var expectedNews = ['newsemitter@0.1.0'];
+var expectedUpdates = ['chain-tiny@0.2.1'];
 var expectedPublished = ['newsemitter@0.1.0', 'chain-tiny@0.2.1'];
-var expectedDeleted = ['Hanzi']
+var expectedDeleted = ['Hanzi'];
 
 describe('npm-updates', function() {
+  var NPM = muk('..', {
+    request: function request(options, callback) {
+      var filepath;
+      var uripath = url.parse(options.uri).path;
+      switch (uripath) {
+        case '/registry/_changes?feed=continuous&since=1':
+          filepath = path.join(__dirname, 'assets', 'changes1.json');
+          return fs.createReadStream(filepath);
+
+        case '/registry/_changes?feed=continuous&since=53':
+          filepath = path.join(__dirname, 'assets', 'changes2.json');
+          return fs.createReadStream(filepath);
+
+        case '/registry/newsemitter':
+          filepath = path.join(__dirname, 'assets', 'newsemitter.json');
+          fs.readFile(filepath, function(err, data) {
+            if (err) return callback(err);
+            callback(null, { statusCode: 200 }, JSON.parse(data));
+          });
+          break;
+
+        case '/registry/chain-tiny':
+          filepath = path.join(__dirname, 'assets', 'chain-tiny.json');
+          fs.readFile(filepath, function(err, data) {
+            if (err) return callback(err);
+            callback(null, { statusCode: 200 }, JSON.parse(data));
+          });
+          break;
+        default:
+          throw Error('Unable to match path: ' + uripath);
+      }
+    }
+  });
+
   var npm = new NPM({ autoStart: false })
     , changes = []
     , newModules = []
@@ -24,24 +59,6 @@ describe('npm-updates', function() {
     , publishedModules = []
     , deletedModules = []
     ;
-
-
-  // mock all requests to the registry
-  nock('http://isaacs.ic.ht')
-    .get('/registry/_changes?feed=continuous&since=1')
-    .replyWithFile(200, path.join(__dirname, 'assets', 'changes1.json'));
-
-  nock('http://isaacs.ic.ht')
-    .get('/registry/_changes?feed=continuous&since=53')
-    .replyWithFile(200, path.join(__dirname, 'assets', 'changes2.json'));
-
-  nock('http://isaacs.ic.ht')
-    .get('/registry/newsemitter')
-    .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
-
-  nock('http://isaacs.ic.ht')
-    .get('/registry/chain-tiny')
-    .replyWithFile(200, path.join(__dirname, 'assets', 'chain-tiny.json'));
 
   npm.on('change', function(obj) {
     changes.push(obj);
@@ -57,11 +74,13 @@ describe('npm-updates', function() {
 
   npm.on('publish', function(info) {
     publishedModules.push(info.name + '@' + info.version);
+    if (publishedModules.length === 2) {
+      npm.emit('done');
+    }
   });
 
   npm.on('delete', function(name) {
     deletedModules.push(name);
-    npm.emit('done');
   });
 
   it('Emits `changes` events', function(done) {

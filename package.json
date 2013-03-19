@@ -19,12 +19,12 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "request": "2.9.x",
-    "jstream": "0.1.x"
+    "request": "~2.16.6",
+    "jstream": "~0.2.4"
   },
   "devDependencies": {
     "mocha": "x",
-    "nock": "0.11.x"
+    "muk": "~0.2.0"
   },
   "licenses": [ {
     "type": "MIT",
