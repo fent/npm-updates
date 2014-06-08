@@ -20,11 +20,11 @@
   },
   "dependencies": {
     "jstream": "~0.2.4",
-    "request": "~2.30.0"
+    "request": "~2.36.0"
   },
   "devDependencies": {
     "mocha": "x",
-    "muk": "~0.2.0"
+    "muk": "~0.3.1"
   },
   "licenses": [ {
     "type": "MIT",
