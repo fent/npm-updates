@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "jstream": "~0.2.4",
-    "request": "~2.37.0"
+    "request": "^2.37.0"
   },
   "devDependencies": {
     "mocha": "x",
