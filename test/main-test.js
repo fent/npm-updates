@@ -1,4 +1,4 @@
-/*jshint quotmark:false */
+/* jshint quotmark:false, maxlen: false */
 var assert = require('assert');
 var path   = require('path');
 var url    = require('url');
@@ -7,9 +7,9 @@ var muk    = require('muk');
 
 
 var expectedChanges = [
-  {"seq":99230,"id":"newsemitter","changes":[{"rev":"5-aca7782ab6beeaef30c36b888f817d2e"}]}
-, {"seq":99235,"id":"chain-tiny","changes":[{"rev":"19-82224279a743d2744f10d52697cdaea9"}]}
-, {"seq":99238,"id":"Hanzi","changes":[{"rev":"4-5ed20f975bd563ae5d1c8c1d574fe24c"}],"deleted":true}
+  {"seq":99230,"id":"newsemitter","changes":[{"rev":"5-aca7782ab6beeaef30c36b888f817d2e"}]},
+  {"seq":99235,"id":"chain-tiny","changes":[{"rev":"19-82224279a743d2744f10d52697cdaea9"}]},
+  {"seq":99238,"id":"Hanzi","changes":[{"rev":"4-5ed20f975bd563ae5d1c8c1d574fe24c"}],"deleted":true}
 ];
 
 var expectedNews = ['newsemitter@0.1.0'];
@@ -52,13 +52,12 @@ describe('npm-updates', function() {
     }
   });
 
-  var npm = new NPM({ autoStart: false })
-    , changes = []
-    , newModules = []
-    , updatedModules = []
-    , publishedModules = []
-    , deletedModules = []
-    ;
+  var npm = new NPM({ autoStart: false });
+  var changes = [];
+  var newModules = [];
+  var updatedModules = [];
+  var publishedModules = [];
+  var deletedModules = [];
 
   npm.on('change', function(obj) {
     changes.push(obj);
