@@ -1,6 +1,8 @@
-# npm-updates [![Build Status](https://secure.travis-ci.org/fent/npm-updates.png)](http://travis-ci.org/fent/npm-updates)
+# npm-updates
 
 Emits update events from the npm repository, or any node modules repository.
+
+[![Build Status](https://secure.travis-ci.org/fent/npm-updates.png)](http://travis-ci.org/fent/npm-updates) [![Dependency Status](https://gemnasium.com/fent/npm-updates.svg)](https://gemnasium.com/fent/npm-updates)
 
 # Usage
 
