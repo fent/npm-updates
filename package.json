@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "mocha": "x",
-    "muk": "~0.4.0"
+    "muk": "~0.5.2"
   },
   "licenses": [
     {
