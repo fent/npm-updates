@@ -18,7 +18,7 @@
   ],
   "main": "./lib/index.js",
   "scripts": {
-    "test": "mocha -R spec test/*-test.js"
+    "test": "istanbul cover node_modules/.bin/_mocha test/*-test.js"
   },
   "directories": {
     "lib": "./lib"
@@ -29,7 +29,8 @@
   },
   "devDependencies": {
     "mocha": "x",
-    "muk": "~0.5.2"
+    "nock": "^8.0.0",
+    "sinon": "^1.17.5"
   },
   "licenses": [
     {
