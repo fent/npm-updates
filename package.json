@@ -28,7 +28,8 @@
     "request": "^2.37.0"
   },
   "devDependencies": {
-    "mocha": "x",
+    "istanbul": "*",
+    "mocha": "*",
     "nock": "^8.0.0",
     "sinon": "^1.17.5"
   },
