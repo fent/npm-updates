@@ -30,7 +30,7 @@
   "devDependencies": {
     "istanbul": "*",
     "mocha": "*",
-    "nock": "^8.0.0",
+    "nock": "^9.0.2",
     "sinon": "^1.17.5"
   },
   "licenses": [
