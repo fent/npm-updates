@@ -33,10 +33,5 @@
     "nock": "^9.0.2",
     "sinon": "^1.17.5"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://github.com/fent/npm-updates/raw/master/LICENSE"
-    }
-  ]
+  "license": "MIT"
 }
