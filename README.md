@@ -3,7 +3,7 @@
 Emits update events from the npm repository, or any node modules repository.
 
 [![Build Status](https://secure.travis-ci.org/fent/npm-updates.svg)](http://travis-ci.org/fent/npm-updates)
-[![Dependency Status](https://gemnasium.com/fent/npm-updates.svg)](https://gemnasium.com/fent/npm-updates)
+[![Dependency Status](https://david-dm.org/fent/npm-updates.svg)](https://david-dm.org/fent/npm-updates)
 [![codecov](https://codecov.io/gh/fent/npm-updates/branch/master/graph/badge.svg)](https://codecov.io/gh/fent/npm-updates)
 
 # Usage
