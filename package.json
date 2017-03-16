@@ -31,7 +31,7 @@
     "istanbul": "*",
     "mocha": "*",
     "nock": "^9.0.2",
-    "sinon": "^1.17.5"
+    "sinon": "^2.0.0"
   },
   "engines": {
     "node": ">=0.12"
