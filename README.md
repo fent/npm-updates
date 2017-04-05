@@ -41,7 +41,7 @@ Stops requesting updates and emitting events.
 ### Event: 'change'
 * `Object`
 
-Change events from the couchdb _changes feed.
+Change events from the couchdb `_changes` feed.
 
 ```js
 { seq: 99230,
@@ -77,7 +77,7 @@ Module was deleted from the registry.
 
 
 # Tests
-Tests are written with [mocha](http://visionmedia.github.com/mocha/)
+Tests are written with [mocha](https://mochajs.org)
 
 ```bash
 npm test
