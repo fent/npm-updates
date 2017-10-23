@@ -9,14 +9,14 @@ Emits update events from the npm repository, or any node modules repository.
 # Usage
 
 ```js
-var NPM = require('npm-updates');
-var npm = new NPM();
+const NPM = require('npm-updates');
+const npm = new NPM();
 
-npm.on('update', function(info) {
+npm.on('update', (info) => {
   console.log('package', info.name, 'was updated to v' + info.version);
 });
 
-npm.on('new', function(info) {
+npm.on('new', (info) => {
   console.log('new module!', info.name);
 });
 ```

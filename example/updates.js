@@ -1,10 +1,10 @@
-var NPM = require('..');
-var npm = new NPM();
+const NPM = require('..');
+const npm = new NPM();
 
-npm.on('update', function(info) {
-  console.log('package', info.name, 'was updated to v' + info.version);
+npm.on('update', (info) => {
+  console.log(`package ${info.name} was updated to v${info.version}`);
 });
 
-npm.on('new', function(info) {
+npm.on('new', (info) => {
   console.log('new module!', info.name);
 });
