@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "jstream": "~1.1.0",
-    "request": "^2.37.0"
+    "request": "^2.85.0"
   },
   "devDependencies": {
     "istanbul": "^0.4.5",
