@@ -1,4 +1,4 @@
-/* eslint quotes:false, maxlen: false */
+/* eslint quotes: "off", maxlen: "off" */
 const NPM         = require('..');
 const assert      = require('assert');
 const path        = require('path');
@@ -21,35 +21,35 @@ const expectedUpdates = ['chain-tiny@0.2.1'];
 const expectedPublished = ['newsemitter@0.1.0', 'chain-tiny@0.2.1'];
 const expectedDeleted = ['Hanzi'];
 
-var clock;
-before(() => { clock = sinon.useFakeTimers(); });
-after(() => { clock.restore(); });
+let clock;
+before(() => clock = sinon.useFakeTimers());
+after(() => clock.restore());
 afterEach(() => { nock.cleanAll(); });
 
 describe('Start it up', () => {
   it('Emits expected module updates', (done) => {
-    var req1 = nock(HOST)
+    const req1 = nock(HOST)
       .get('/registry/_changes?feed=continuous&since=1')
       .replyWithFile(200, path.join(__dirname, 'assets', 'changes1.json'));
 
-    var req2 = nock(HOST)
+    const req2 = nock(HOST)
       .get('/registry/_changes?feed=continuous&since=53')
       .replyWithFile(200, path.join(__dirname, 'assets', 'changes2.json'));
 
-    var req3 = nock(HOST)
+    const req3 = nock(HOST)
       .get('/registry/newsemitter')
       .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
 
-    var req4 = nock(HOST)
+    const req4 = nock(HOST)
       .get('/registry/chain-tiny')
       .replyWithFile(200, path.join(__dirname, 'assets', 'chain-tiny.json'));
 
-    var npm       = new NPM();
-    var changes   = [];
-    var news      = [];
-    var updated   = [];
-    var published = [];
-    var deleted   = [];
+    const npm       = new NPM();
+    const changes   = [];
+    const news      = [];
+    const updated   = [];
+    const published = [];
+    const deleted   = [];
 
     npm.once('stream-end', () => {
       clock.tick(500);
@@ -93,24 +93,24 @@ describe('Start it up', () => {
 
 describe('Long running stream', () => {
   it('Emits changes after some time on first request', (done) => {
-    var npm = new NPM();
-    var changes = sinon.spy();
+    const npm = new NPM();
+    const changes = sinon.spy();
 
-    var req1 = nock(HOST)
+    const req1 = nock(HOST)
       .get('/registry/_changes?feed=continuous&since=1')
       .reply(200, () => {
-        var stream = new PassThrough();
-        var file1 = path.join(__dirname, 'assets', 'changes1.json');
+        const stream = new PassThrough();
+        const file1 = path.join(__dirname, 'assets', 'changes1.json');
         fs.readFile(file1, (err, body) => {
-          if (err) return done(err);
+          assert.ifError(err);
           stream.write(body);
           assert.equal(changes.length, 0);
 
           // Wait some time before next data event..
           setTimeout(() => {
-            var file2 = path.join(__dirname, 'assets', 'changes2.json');
+            const file2 = path.join(__dirname, 'assets', 'changes2.json');
             fs.readFile(file2, (err, body) => {
-              if (err) return done(err);
+              assert.ifError(err);
               stream.end(body);
             });
           }, 3000);
@@ -119,7 +119,7 @@ describe('Long running stream', () => {
         return stream;
       });
 
-    nock(HOST)
+    const req2 = nock(HOST)
       .get('/registry/newsemitter')
       .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
 
@@ -130,6 +130,7 @@ describe('Long running stream', () => {
         npm.stop();
         assert.equal(changes.callCount, 3);
         req1.done();
+        req2.done();
         done();
       });
 
@@ -145,11 +146,11 @@ describe('Long running stream', () => {
 
 describe('Start it up more than once', () => {
   it('Makes just one request', (done) => {
-    var req1 = nock(HOST)
+    const req1 = nock(HOST)
       .get('/registry/_changes?feed=continuous&since=1')
       .replyWithFile(200, path.join(__dirname, 'assets', 'changes1.json'));
 
-    var npm = new NPM({ autoStart: false });
+    const npm = new NPM({ autoStart: false });
     npm.start();
     npm.start();
     npm.on('stream-end', () => {
@@ -162,15 +163,15 @@ describe('Start it up more than once', () => {
 
 describe('End it before first request ends', () => {
   it('Aborts the request in progress', (done) => {
-    var req1 = nock(HOST)
+    const req1 = nock(HOST)
       .get('/registry/_changes?feed=continuous&since=1')
       .replyWithFile(200, path.join(__dirname, 'assets', 'changes1.json'));
 
-    var req2 = nock(HOST)
+    const req2 = nock(HOST)
       .get('/registry/_changes?feed=continuous&since=53')
       .replyWithFile(200, path.join(__dirname, 'assets', 'changes3.json'));
 
-    var npm = new NPM();
+    const npm = new NPM();
 
     npm.once('stream-end', () => {
       clock.tick(500);
@@ -188,16 +189,16 @@ describe('End it before first request ends', () => {
 
 describe('Stream has same module more than once in short time', () => {
   it('Emits changes for it once', (done) => {
-    var req1 = nock(HOST)
+    const req1 = nock(HOST)
       .get('/registry/_changes?feed=continuous&since=2')
       .replyWithFile(200, path.join(__dirname, 'assets', 'changes4.json'));
 
-    var req2 = nock(HOST)
+    const req2 = nock(HOST)
       .get('/registry/newsemitter')
       .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
 
-    var npm = new NPM({ lastSeq: 2 });
-    var changeSpy = sinon.spy();
+    const npm = new NPM({ lastSeq: 2 });
+    const changeSpy = sinon.spy();
 
     npm.on('change', changeSpy);
 
@@ -212,31 +213,31 @@ describe('Stream has same module more than once in short time', () => {
   });
 
   it('Emits changes after info timeout', (done) => {
-    var req1 = nock(HOST)
+    const req1 = nock(HOST)
       .get('/registry/_changes?feed=continuous&since=2')
       .replyWithFile(200, path.join(__dirname, 'assets', 'changes4.json'));
 
-    nock(HOST)
+    const req2 = nock(HOST)
       .get('/registry/newsemitter')
       .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
 
-    nock(HOST)
+    const req3 = nock(HOST)
       .get('/registry/newsemitter')
       .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
 
-    var req4 = nock(HOST)
+    const req4 = nock(HOST)
       .get('/registry/_changes?feed=continuous&since=99230')
       .reply(200, () => {
-        var stream = new PassThrough();
+        const stream = new PassThrough();
         process.nextTick(() => {
-          var filepath = path.join(__dirname, 'assets', 'changes4.json');
+          const filepath = path.join(__dirname, 'assets', 'changes4.json');
           fs.createReadStream(filepath).pipe(stream);
         });
         return stream;
       });
 
-    var npm = new NPM({ lastSeq: 2 });
-    var changeSpy = sinon.spy();
+    const npm = new NPM({ lastSeq: 2 });
+    const changeSpy = sinon.spy();
     npm.on('change', changeSpy);
 
     npm.on('publish', () => {
@@ -252,6 +253,8 @@ describe('Stream has same module more than once in short time', () => {
         process.nextTick(() => {
           assert.ok(changeSpy.calledTwice);
           req1.done();
+          req2.done();
+          req3.done();
           req4.done();
           done();
         });
@@ -263,13 +266,13 @@ describe('Stream has same module more than once in short time', () => {
 describe('NPM#getInfo()', () => {
   describe('Try retrieving a package without dist-tags', () => {
     it('Makes no more than n requests', (done) => {
-      var req1 = nock(HOST)
+      const req1 = nock(HOST)
         .get('/registry/newsemitter')
         .reply(200, '{}');
-      var req2 = nock(HOST)
+      const req2 = nock(HOST)
         .get('/registry/newsemitter')
         .reply(200, '{"dist-tags":{}}');
-      var req3 = nock(HOST)
+      const req3 = nock(HOST)
         .get('/registry/newsemitter')
         .reply(200, '{}');
 
@@ -293,7 +296,7 @@ describe('NPM#getInfo()', () => {
         });
       });
 
-      var npm = new NPM({ autoStart: false });
+      const npm = new NPM({ autoStart: false });
       npm.on('publish', () => {
         throw Error('Should not publish without dist-tags');
       });
@@ -303,11 +306,11 @@ describe('NPM#getInfo()', () => {
 
   describe('Try to retrieve a module that returns an error', () => {
     it('Emits an error', (done) => {
-      var req1 = nock(HOST)
+      const req1 = nock(HOST)
         .get('/registry/newsemitter')
         .replyWithError('Something awful happened');
 
-      var npm = new NPM({ autoStart: false });
+      const npm = new NPM({ autoStart: false });
       npm.on('error', (err) => {
         assert.ok(/awful/.test(err.message));
         req1.done();
@@ -319,11 +322,11 @@ describe('NPM#getInfo()', () => {
 
   describe('Try to retrieve a non-existant module', () => {
     it('Emits an error', (done) => {
-      var req1 = nock(HOST)
+      const req1 = nock(HOST)
         .get('/registry/dontexist')
         .reply(404);
 
-      var npm = new NPM({ autoStart: false });
+      const npm = new NPM({ autoStart: false });
       npm.on('error', (err) => {
         assert.ok(/Status Code: 404/.test(err.message));
         req1.done();
