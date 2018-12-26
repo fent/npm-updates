@@ -21,242 +21,245 @@ const expectedUpdates = ['chain-tiny@0.2.1'];
 const expectedPublished = ['newsemitter@0.1.0', 'chain-tiny@0.2.1'];
 const expectedDeleted = ['Hanzi'];
 
-let clock;
-before(() => clock = sinon.useFakeTimers());
-after(() => clock.restore());
 afterEach(() => { nock.cleanAll(); });
 
-describe('Start it up', () => {
-  it('Emits expected module updates', (done) => {
-    const req1 = nock(HOST)
-      .get('/registry/_changes?feed=continuous&since=1')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'changes1.json'));
+describe('NPM#start()', () => {
+  let clock;
+  before(() => clock = sinon.useFakeTimers());
+  after(() => clock.restore());
 
-    const req2 = nock(HOST)
-      .get('/registry/_changes?feed=continuous&since=53')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'changes2.json'));
+  describe('Start it up', () => {
+    it('Emits expected module updates', (done) => {
+      const req1 = nock(HOST)
+        .get('/registry/_changes?feed=continuous&since=1')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'changes1.json'));
 
-    const req3 = nock(HOST)
-      .get('/registry/newsemitter')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
+      const req2 = nock(HOST)
+        .get('/registry/_changes?feed=continuous&since=53')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'changes2.json'));
 
-    const req4 = nock(HOST)
-      .get('/registry/chain-tiny')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'chain-tiny.json'));
+      const req3 = nock(HOST)
+        .get('/registry/newsemitter')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
 
-    const npm       = new NPM();
-    const changes   = [];
-    const news      = [];
-    const updated   = [];
-    const published = [];
-    const deleted   = [];
+      const req4 = nock(HOST)
+        .get('/registry/chain-tiny')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'chain-tiny.json'));
 
-    npm.once('stream-end', () => {
-      clock.tick(500);
-    });
-
-    npm.on('change', (obj) => {
-      changes.push(obj);
-    });
-
-    npm.on('new', (info) => {
-      news.push(info.name + '@' + info.version);
-    });
-
-    npm.on('update', (info) => {
-      updated.push(info.name + '@' + info.version);
-    });
-
-    npm.on('publish', (info) => {
-      published.push(info.name + '@' + info.version);
-      if (published.length >= 2) {
-        npm.stop();
-        assert.deepEqual(expectedChanges, changes);
-        assert.deepEqual(expectedNews, news);
-        assert.deepEqual(expectedUpdates, updated);
-        assert.deepEqual(expectedPublished, published);
-        assert.deepEqual(expectedDeleted, deleted);
-        req1.done();
-        req2.done();
-        req3.done();
-        req4.done();
-        done();
-      }
-      clock.tick(500);
-    });
-
-    npm.on('delete', (name) => {
-      deleted.push(name);
-    });
-  });
-});
-
-describe('Long running stream', () => {
-  it('Emits changes after some time on first request', (done) => {
-    const npm = new NPM();
-    const changes = sinon.spy();
-
-    const req1 = nock(HOST)
-      .get('/registry/_changes?feed=continuous&since=1')
-      .reply(200, () => {
-        const stream = new PassThrough();
-        const file1 = path.join(__dirname, 'assets', 'changes1.json');
-        fs.readFile(file1, (err, body) => {
-          assert.ifError(err);
-          stream.write(body);
-          assert.equal(changes.length, 0);
-
-          // Wait some time before next data event..
-          setTimeout(() => {
-            const file2 = path.join(__dirname, 'assets', 'changes2.json');
-            fs.readFile(file2, (err, body) => {
-              assert.ifError(err);
-              stream.end(body);
-            });
-          }, 3000);
-          clock.tick(3000);
-        });
-        return stream;
-      });
-
-    const req2 = nock(HOST)
-      .get('/registry/newsemitter')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
-
-    nock(HOST)
-      .get('/registry/chain-tiny')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'chain-tiny.json'))
-      .on('request', () => {
-        npm.stop();
-        assert.equal(changes.callCount, 3);
-        req1.done();
-        req2.done();
-        done();
-      });
-
-    npm.on('change', changes);
-
-    npm.on('stream-end', () => {
-      npm.stop();
-      clock.tick(500);
-    });
-
-  });
-});
-
-describe('Start it up more than once', () => {
-  it('Makes just one request', (done) => {
-    const req1 = nock(HOST)
-      .get('/registry/_changes?feed=continuous&since=1')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'changes1.json'));
-
-    const npm = new NPM({ autoStart: false });
-    npm.start();
-    npm.start();
-    npm.on('stream-end', () => {
-      npm.stop();
-      req1.done();
-      done();
-    });
-  });
-});
-
-describe('End it before first request ends', () => {
-  it('Aborts the request in progress', (done) => {
-    const req1 = nock(HOST)
-      .get('/registry/_changes?feed=continuous&since=1')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'changes1.json'));
-
-    const req2 = nock(HOST)
-      .get('/registry/_changes?feed=continuous&since=53')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'changes3.json'));
-
-    const npm = new NPM();
-
-    npm.once('stream-end', () => {
-      clock.tick(500);
-    });
-
-    npm.on('change', () => {
-      npm.stop();
-      clock.tick(3000);
-      req1.done();
-      req2.done();
-      done();
-    });
-  });
-});
-
-describe('Stream has same module more than once in short time', () => {
-  it('Emits changes for it once', (done) => {
-    const req1 = nock(HOST)
-      .get('/registry/_changes?feed=continuous&since=2')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'changes4.json'));
-
-    const req2 = nock(HOST)
-      .get('/registry/newsemitter')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
-
-    const npm = new NPM({ lastSeq: 2 });
-    const changeSpy = sinon.spy();
-
-    npm.on('change', changeSpy);
-
-    npm.once('stream-end', () => {
-      npm.stop();
-      assert.ok(changeSpy.calledOnce);
-      clock.tick(500);
-      req1.done();
-      req2.done();
-      done();
-    });
-  });
-
-  it('Emits changes after info timeout', (done) => {
-    const req1 = nock(HOST)
-      .get('/registry/_changes?feed=continuous&since=2')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'changes4.json'));
-
-    const req2 = nock(HOST)
-      .get('/registry/newsemitter')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
-
-    const req3 = nock(HOST)
-      .get('/registry/newsemitter')
-      .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
-
-    const req4 = nock(HOST)
-      .get('/registry/_changes?feed=continuous&since=99230')
-      .reply(200, () => {
-        const stream = new PassThrough();
-        process.nextTick(() => {
-          const filepath = path.join(__dirname, 'assets', 'changes4.json');
-          fs.createReadStream(filepath).pipe(stream);
-        });
-        return stream;
-      });
-
-    const npm = new NPM({ lastSeq: 2 });
-    const changeSpy = sinon.spy();
-    npm.on('change', changeSpy);
-
-    npm.on('publish', () => {
-      clock.tick(10000);
-    });
-
-    npm.once('stream-end', () => {
-      assert.ok(changeSpy.calledOnce);
-      clock.tick(500);
+      const npm       = new NPM();
+      const changes   = [];
+      const news      = [];
+      const updated   = [];
+      const published = [];
+      const deleted   = [];
 
       npm.once('stream-end', () => {
-        npm.stop();
-        process.nextTick(() => {
-          assert.ok(changeSpy.calledTwice);
+        clock.tick(500);
+      });
+
+      npm.on('change', (obj) => {
+        changes.push(obj);
+      });
+
+      npm.on('new', (info) => {
+        news.push(info.name + '@' + info.version);
+      });
+
+      npm.on('update', (info) => {
+        updated.push(info.name + '@' + info.version);
+      });
+
+      npm.on('publish', (info) => {
+        published.push(info.name + '@' + info.version);
+        if (published.length >= 2) {
+          npm.stop();
+          assert.deepEqual(expectedChanges, changes);
+          assert.deepEqual(expectedNews, news);
+          assert.deepEqual(expectedUpdates, updated);
+          assert.deepEqual(expectedPublished, published);
+          assert.deepEqual(expectedDeleted, deleted);
           req1.done();
           req2.done();
           req3.done();
           req4.done();
           done();
+        }
+        clock.tick(500);
+      });
+
+      npm.on('delete', (name) => {
+        deleted.push(name);
+      });
+    });
+  });
+
+  describe('Long running stream', () => {
+    it('Emits changes after some time on first request', (done) => {
+      const npm = new NPM();
+      const changes = sinon.spy();
+
+      const req1 = nock(HOST)
+        .get('/registry/_changes?feed=continuous&since=1')
+        .reply(200, () => {
+          const stream = new PassThrough();
+          const file1 = path.join(__dirname, 'assets', 'changes1.json');
+          fs.readFile(file1, (err, body) => {
+            assert.ifError(err);
+            stream.write(body);
+            assert.equal(changes.length, 0);
+
+            // Wait some time before next data event..
+            setTimeout(() => {
+              const file2 = path.join(__dirname, 'assets', 'changes2.json');
+              fs.readFile(file2, (err, body) => {
+                assert.ifError(err);
+                stream.end(body);
+              });
+            }, 3000);
+            clock.tick(3000);
+          });
+          return stream;
+        });
+
+      const req2 = nock(HOST)
+        .get('/registry/newsemitter')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
+
+      nock(HOST)
+        .get('/registry/chain-tiny')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'chain-tiny.json'))
+        .on('request', () => {
+          npm.stop();
+          assert.equal(changes.callCount, 3);
+          req1.done();
+          req2.done();
+          done();
+        });
+
+      npm.on('change', changes);
+
+      npm.on('stream-end', () => {
+        npm.stop();
+        clock.tick(500);
+      });
+
+    });
+  });
+
+  describe('Start it up more than once', () => {
+    it('Makes just one request', (done) => {
+      const req1 = nock(HOST)
+        .get('/registry/_changes?feed=continuous&since=1')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'changes1.json'));
+
+      const npm = new NPM({ autoStart: false });
+      npm.start();
+      npm.start();
+      npm.on('stream-end', () => {
+        npm.stop();
+        req1.done();
+        done();
+      });
+    });
+  });
+
+  describe('End it before first request ends', () => {
+    it('Aborts the request in progress', (done) => {
+      const req1 = nock(HOST)
+        .get('/registry/_changes?feed=continuous&since=1')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'changes1.json'));
+
+      const req2 = nock(HOST)
+        .get('/registry/_changes?feed=continuous&since=53')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'changes3.json'));
+
+      const npm = new NPM();
+
+      npm.once('stream-end', () => {
+        clock.tick(500);
+      });
+
+      npm.on('change', () => {
+        npm.stop();
+        clock.tick(3000);
+        req1.done();
+        req2.done();
+        done();
+      });
+    });
+  });
+
+  describe('Stream has same module more than once in short time', () => {
+    it('Emits changes for it once', (done) => {
+      const req1 = nock(HOST)
+        .get('/registry/_changes?feed=continuous&since=2')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'changes4.json'));
+
+      const req2 = nock(HOST)
+        .get('/registry/newsemitter')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
+
+      const npm = new NPM({ lastSeq: 2 });
+      const changeSpy = sinon.spy();
+
+      npm.on('change', changeSpy);
+
+      npm.once('stream-end', () => {
+        npm.stop();
+        assert.ok(changeSpy.calledOnce);
+        clock.tick(500);
+        req1.done();
+        req2.done();
+        done();
+      });
+    });
+
+    it('Emits changes after info timeout', (done) => {
+      const req1 = nock(HOST)
+        .get('/registry/_changes?feed=continuous&since=2')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'changes4.json'));
+
+      const req2 = nock(HOST)
+        .get('/registry/newsemitter')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
+
+      const req3 = nock(HOST)
+        .get('/registry/newsemitter')
+        .replyWithFile(200, path.join(__dirname, 'assets', 'newsemitter.json'));
+
+      const req4 = nock(HOST)
+        .get('/registry/_changes?feed=continuous&since=99230')
+        .reply(200, () => {
+          const stream = new PassThrough();
+          process.nextTick(() => {
+            const filepath = path.join(__dirname, 'assets', 'changes4.json');
+            fs.createReadStream(filepath).pipe(stream);
+          });
+          return stream;
+        });
+
+      const npm = new NPM({ lastSeq: 2 });
+      const changeSpy = sinon.spy();
+      npm.on('change', changeSpy);
+
+      npm.on('publish', () => {
+        clock.tick(10000);
+      });
+
+      npm.once('stream-end', () => {
+        assert.ok(changeSpy.calledOnce);
+        clock.tick(500);
+
+        npm.once('stream-end', () => {
+          npm.stop();
+          process.nextTick(() => {
+            assert.ok(changeSpy.calledTwice);
+            req1.done();
+            req2.done();
+            req3.done();
+            req4.done();
+            done();
+          });
         });
       });
     });
@@ -264,6 +267,11 @@ describe('Stream has same module more than once in short time', () => {
 });
 
 describe('NPM#getInfo()', () => {
+  let setTimeout = global.setTimeout;
+  before(() => { global.setTimeout = (fn, ms, ...args) => {
+    setTimeout(fn, 0, ...args);
+  }; });
+  after(() => { global.setTimeout = setTimeout; });
   describe('Try retrieving a package without dist-tags', () => {
     it('Makes no more than n requests', (done) => {
       const req1 = nock(HOST)
@@ -276,19 +284,8 @@ describe('NPM#getInfo()', () => {
         .get('/registry/newsemitter')
         .reply(200, '{}');
 
-      req1.on('replied', () => {
-        process.nextTick(() => {
-          clock.tick(10000);
-        });
-      });
-      req2.on('replied', () => {
-        process.nextTick(() => {
-          clock.tick(10000);
-        });
-      });
       req3.on('replied', () => {
         process.nextTick(() => {
-          clock.tick(10000);
           req1.done();
           req2.done();
           req3.done();
