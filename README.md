@@ -2,7 +2,7 @@
 
 Emits update events from the npm repository, or any node modules repository.
 
-[![Dependency Status](https://david-dm.org/fent/npm-updates.svg)](https://david-dm.org/fent/npm-updates)
+![Depfu](https://img.shields.io/depfu/fent/npm-updates)
 [![codecov](https://codecov.io/gh/fent/npm-updates/branch/master/graph/badge.svg)](https://codecov.io/gh/fent/npm-updates)
 
 # Usage
