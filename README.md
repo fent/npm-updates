@@ -1,5 +1,8 @@
 # npm-updates
 
+> [!WARNING]
+> This project is no longer maintained and has been archived.
+
 Emits update events from the npm repository, or any node modules repository.
 
 ![Depfu](https://img.shields.io/depfu/fent/npm-updates)
